@@ -9,12 +9,13 @@ class Command(BaseCommand):
     help = 'Загрузка данных в модель ингредиентов'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING('Старт команды'))
+        self.stdout.write(self.style.WARNING('Загружаем данные'))
         with open('data/ingredients.json', encoding='utf-8',
                   ) as data_file_ingredients:
             ingredient_data = json.loads(data_file_ingredients.read())
             for ingredients in ingredient_data:
                 Ingredient.objects.get_or_create(**ingredients)
+
         with open('data/tags.json', encoding='utf-8',
                   ) as data_file_tags:
             tags_data = json.loads(data_file_tags.read())
