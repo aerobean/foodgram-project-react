@@ -2,4 +2,4 @@ https://github.com/aerobean/foodgram-project-react/actions/workflows/main.yml/ba
 
 Дипломный проект сайта с рецептами "Продуктовый помощник"
 
-временный адрес сайта: http://158.160.97.172/
+временный адрес сайта: http://158.160.59.151/
