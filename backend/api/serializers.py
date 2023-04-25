@@ -170,15 +170,15 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return cooking_time
 
     def validate_ingredients(self, ingredients):
-        ingredients_list = []
+        ingredients_for_recipe = []
         if not ingredients:
             raise serializers.ValidationError(
                 'Отсутствуют ингредиенты.')
         for ingredient in ingredients:
-            if ingredient['id'] in ingredients_list:
+            if ingredient['id'] in ingredients_for_recipe:
                 raise serializers.ValidationError(
                     'Ингредиенты должны быть уникальны.')
-            ingredients_list.append(ingredient['id'])
+            ingredients_for_recipe.append(ingredient['id'])
             if int(ingredient.get('amount')) < 1:
                 raise serializers.ValidationError(
                     'Количество ингредиентов должно быть больше 0.')
@@ -186,16 +186,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def create_ingredients(recipe, ingredients):
-        ingredient_liist = []
+        ingredients_for_recipe = []
         for ingredient_data in ingredients:
-            ingredient_liist.append(
+            ingredients_for_recipe.append(
                 IngredientRecipe(
                     ingredient=ingredient_data.pop('id'),
                     amount=ingredient_data.pop('amount'),
                     recipe=recipe,
                 )
             )
-        IngredientRecipe.objects.bulk_create(ingredient_liist)
+        IngredientRecipe.objects.bulk_create(ingredients_for_recipe)
 
     def create(self, validated_data):
         request = self.context.get('request', None)

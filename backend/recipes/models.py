@@ -165,6 +165,9 @@ class ShoppingCart(FavoriteShoppingCart):
 
 class IngredientRecipe(models.Model):
     """Ингредиенты рецепта."""
+
+# Уникальность проверяется на уровне сериализатора
+
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингредиент',
