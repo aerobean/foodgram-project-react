@@ -166,8 +166,6 @@ class ShoppingCart(FavoriteShoppingCart):
 class IngredientRecipe(models.Model):
     """Ингредиенты рецепта."""
 
-# Уникальность проверяется на уровне сериализатора
-
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингредиент',
@@ -188,6 +186,12 @@ class IngredientRecipe(models.Model):
         ordering = ('-id',)
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='%(app_label)s_%(class)s_unique'
+            )
+        ]
 
     def __str__(self):
         return (

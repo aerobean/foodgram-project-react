@@ -72,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe__shopping_list__user=request.user
         ).order_by('ingredient__name').values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount_for_recipe'))
+        ).annotate(amount_for_recipe=Sum('amount'))
         return self.send_message(ingredients)
 
     def add_to_cart(self, request, pk, serializer_class):
