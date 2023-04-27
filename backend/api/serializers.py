@@ -107,7 +107,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
-    """Сериализатор просмотра рецепта."""
+    """Сериализатор просмотра рецептов."""
     tags = TagSerializer(read_only=False, many=True)
     author = UserSerializer(read_only=True, many=False)
     ingredients = IngredientRecipeSerializer(
