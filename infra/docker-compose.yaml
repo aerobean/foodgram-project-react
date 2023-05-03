@@ -24,7 +24,7 @@ services:
   frontend:
     image: aerobean/frontend:latest
     volumes:
-      - ../frontend/:/app/result_build/
+      - ./frontend/:/app/result_build/
     depends_on:
       - db
     container_name: frontend
