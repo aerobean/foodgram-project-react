@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-# from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Tag)
 from users.models import Follow, User
-from .filters import IngredientFilter  # , RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .pagination import CustomPagination
 from .permissions import AuthorPermission
 from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
@@ -44,8 +44,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (AuthorPermission,)
     pagination_class = CustomPagination
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RecipeFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -59,7 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             shopping_list += (
                 f"\n{ingredient['ingredient__name']} "
                 f"({ingredient['ingredient__measurement_unit']}) - "
-                f"{ingredient['amount_for_recipe']}")
+                f"{ingredient['amount']}")
         file = 'shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
@@ -71,7 +71,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe__shopping_list__user=request.user
         ).order_by('ingredient__name').values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(amount_for_recipe=Sum('amount'))
+        ).annotate(amount=Sum('amount'))
         return self.send_message(ingredients)
 
     def add_to_cart(self, request, pk, serializer_class):
