@@ -44,8 +44,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (AuthorPermission,)
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
+    # filter_backends = (DjangoFilterBackend,)
+    # filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
