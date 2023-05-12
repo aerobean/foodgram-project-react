@@ -91,18 +91,10 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit',)
 
 
-class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор просмотра ингредиентов."""
-
-    class Meta:
-        model = Ingredient
-        fields = ('id', 'name', 'measurement_unit',)
-
-
 class IngredientRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов и рецепта."""
-    id = serializers.ReadOnlyField(
-        source='ingredient.id'
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
     )
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -132,6 +124,10 @@ class RecipeReadSerializer(serializers.ModelSerializer):
                   'name', 'image', 'text', 'cooking_time'
                   )
 
+    def get_ingredients(self, obj):
+        ingredients = IngredientRecipe.objects.filter(recipe=obj)
+        return IngredientRecipeSerializer(ingredients, many=True).data
+
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
@@ -142,6 +138,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
+        return obj.shopping_list.filter(user=request.user).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
