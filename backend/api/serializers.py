@@ -93,9 +93,11 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для связи ингридиентов и рецепта."""
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
-    )
+    # id = serializers.PrimaryKeyRelatedField(
+    #     queryset=Ingredient.objects.all()
+    # )
+    id = serializers.ReadOnlyField(
+        source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
@@ -167,40 +169,37 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, ingredients):
         ingredients_list = []
         for ingredient in ingredients:
-            if ingredient['id'] in ingredients_list:
-                raise serializers.ValidationError(
-                    'Нельзя добавить два одинаковых ингредиента')
+            ingredient_id = ingredient['id']
+            if ingredient_id in ingredients_list:
+                raise serializers.ValidationError('Нельзя добавить два одинаковых ингредиента')
+            ingredients_list.append(ingredient_id)
         return ingredients
 
     @staticmethod
     def add_ingredients(recipe, ingredients):
-        ingredient_for_recipe = []
-        for ingredient_data in ingredients:
-            ingredient_for_recipe.append(
-                IngredientRecipe(
-                    ingredient=ingredient_data.pop('id'),
-                    amount=ingredient_data.pop('amount'),
-                    recipe=recipe,
-                )
-            )
-        IngredientRecipe.objects.bulk_create(ingredient_for_recipe)
+        IngredientRecipe.objects.bulk_create(
+            [IngredientRecipe(
+                ingredient=Ingredient.objects.get(id=ingredient['id']),
+                recipe=recipe,
+                amount=ingredient['amount']
+            ) for ingredient in ingredients]
+        )
 
     def create(self, validated_data):
         request = self.context.get('request', None)
         tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
+        validated_data.pop('ingredient_to_recipe')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
-        self.add_ingredients(recipe, ingredients)
+        self.add_ingredients(recipe, self.initial_data['ingredients'])
         return recipe
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
         instance.tags.clear()
-        instance.ingredients.clear()
-        instance.tags.set(tags)
-        self.add_ingredients(instance, ingredients)
+        IngredientRecipe.objects.filter(recipe=instance).delete()
+        instance.tags.set(validated_data.pop('tags'))
+        validated_data.pop('ingredient_to_recipe')
+        self.add_ingredients(instance, self.initial_data['ingredients'])
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
