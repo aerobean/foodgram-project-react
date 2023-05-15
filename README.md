@@ -1,6 +1,6 @@
 https://github.com/aerobean/foodgram-project-react/actions/workflows/main.yml/badge.svg
 
-временный адрес сайта: http://158.160.36.158/
+временный адрес сайта: http://158.160.103.242/
 
 
 # Foodgram Project

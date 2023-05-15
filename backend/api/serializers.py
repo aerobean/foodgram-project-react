@@ -174,14 +174,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'author'
         )
 
-    # def validate_ingredients(self, ingredients):
-    #     ingredients_list = []
-    #     for ingredient in ingredients:
-    #         if ingredient['id'] in ingredients_list:
-    #             raise serializers.ValidationError(
-    #                 'Нельзя добавить одинаковые ингредиенты')
-    #         ingredients_list.append(ingredient['id'])
-    #     return ingredients
+    def validate_ingredients(self, ingredients):
+        ingredients_list = []
+        for ingredient in ingredients:
+            if ingredient['id'] in ingredients_list:
+                raise serializers.ValidationError(
+                    'Нельзя добавить одинаковые ингредиенты')
+            ingredients_list.append(ingredient['id'])
+        return ingredients
 
     @staticmethod
     def add_ingredients(recipe, ingredients):
